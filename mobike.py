@@ -10,16 +10,21 @@ import json
 import random
 import time
 import sys
+import os
 
 from kml import KML
 
 import logging
 
+# logging.basicConfig(level=logging.DEBUG)
 
-f=open("good_proxies.txt")
 proxies=[]
-for line in f:
-    proxies.append(line[:-1])
+if os.path.exists("good_proxies.txt"):
+    f=open("good_proxies.txt")
+    for line in f:
+        proxies.append(line[:-1])
+if len(proxies)==0:
+    sys.stderr.write("No proxy found !\n")
 
 def _frange(x, y, step):
   while x < y:
@@ -30,19 +35,29 @@ def _frange(x, y, step):
 def _get_nearby_bikes_info((latitude,longitude)):
     while True:
         try:
-            proxy=random.choice(proxies)
-            r=requests.post("http://api.mobike.com/mobike-api/rent/nearbyBikesInfo.do",
-                                    "latitude=%.6f&longitude=%.6f"%(latitude,longitude),
-                                    headers={
-                                            'User-Agent': 'Googlebot/2.1',
-                                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                                            'Accept-Encoding': 'gzip'
-                                            },
-                                    proxies={"http": "http://"+proxy},timeout=5)
-            if r.status_code>200:
-                if proxy in proxies:
-                    proxies.remove(proxy)
-                continue
+            r=None
+            if len(proxies)>0:
+                proxy=random.choice(proxies)
+                r=requests.post("http://api.mobike.com/mobike-api/rent/nearbyBikesInfo.do",
+                                        "latitude=%.6f&longitude=%.6f"%(latitude,longitude),
+                                        headers={
+                                                'User-Agent': 'Googlebot/2.1',
+                                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                                'Accept-Encoding': 'gzip'
+                                                },
+                                        proxies={"http": "http://"+proxy},timeout=5)
+                if r.status_code > 200:
+                    if proxy in proxies:
+                        proxies.remove(proxy)
+                    continue
+            else:
+                r = requests.post("http://api.mobike.com/mobike-api/rent/nearbyBikesInfo.do",
+                                  "latitude=%.6f&longitude=%.6f" % (latitude, longitude),
+                                  headers={
+                                      'User-Agent': 'Googlebot/2.1',
+                                      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                      'Accept-Encoding': 'gzip'
+                                  }, timeout=5)
             json_text = r.text
             logging.debug(json_text)
             obj= json.loads(json_text)
@@ -69,6 +84,7 @@ def _process_task(task):
             object = obj['object']
             for bike in object:
                 dic[bike['distId']] = {'distId': bike['distId'],
+                                       'biketype':bike['biketype'],
                                        'distX': bike['distX'],
                                        'distY': bike['distY']}
     return dic.values()
@@ -85,18 +101,25 @@ def get_bikes_in_range(lon_min, lon_max, lat_min, lat_max, kml_path=None):
     if kml_path != None:
         k = KML()
         for bike in bikes:
-            k.add_bike((bike['distId'], bike['distX'], bike['distY']))
+            k.add_bike(bike)
         f = open(kml_path, "w")
         f.write(k.get_kml())
         f.close()
-    else:
-        for bike in bikes:
-            sys.stdout.write(str(bike['distId']) + "," + str(bike['distX']) + "," + str(bike['distY']) + "\n")
+    sys.stdout.write(",".join(["bikeid","type","lon","lat"]) + "\n")
+    for bike in bikes:
+        sys.stdout.write(",".join([bike['distId'],"lite" if bike['biketype']==2 else "classical", str(bike['distX']), str(bike['distY'])]) + "\n")
     logging.info("time: %fs"%(time.time()-start))
 
 
 if __name__=="__main__":
-    sys.stderr.write("start download\n")
-    get_bikes_in_range(116, 116.8, 39.6, 40.3)  #北京六环以内的区域,3186块,可以涵盖95%以上的车
-    #get_bikes_in_range(115.7, 117.4, 39.4, 41.6)  #地理书上的整个北京辖区,20976块,大约是六环内的7被面积
+    sys.stderr.write("Start download\n")
+
+    #get_bikes_in_range(116.4, 116.5, 39.9, 40.0,kml_path="test.kml")  #测试用的小范围
+
+    #get_bikes_in_range(116, 116.8, 39.6, 40.3,kml_path="beijing.kml")  #北京六环以内的区域,3186块,可以涵盖95%以上的车
+
+    get_bikes_in_range(115.7, 117.4, 39.4, 41.6,kml_path="beijing_all.kml")  #地理书上的整个北京辖区,20976块,大约是六环内的7倍面积
+
+    #get_bikes_in_range(120.85,122.2,30.6,31.9,kml_path="shanghai.kml")  #上海范围
+
     sys.stderr.write("done")

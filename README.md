@@ -1,8 +1,9 @@
 # MobikeAgent
-摩拜单车(Mobike)扫描器，自动搜集全北京所有可用的单车
+摩拜单车(Mobike)扫描器，自动搜集全北京、上海所有可用的单车。支持输出CSV和KML。
 
-![Google Earth中可视化收集到的KML](https://raw.githubusercontent.com/yrjyrj123/image/master/mobike_google_earth.png)
+![Google Earth中可视化收集到的KML](https://github.com/yrjyrj123/image/raw/master/mobike_agent_demo.gif)
 
+白色底色为新增的Lite版单车，红色底色为老版摩拜单车。
 
 ##依赖安装
 	pip install -r requirements.txt
@@ -32,5 +33,8 @@
     
     mobike.get_bikes_in_range(116, 116.8, 39.6, 40.3, kml_path="out.kml")   #输出KML文件，用于在Google Earth等工具中可视化
     
+##数据样例：
+**/data**目录下为2016年10月22日中午采集的数据。分为北京和上海的CSV和KML文件，共4个，约4w辆单车，供参考。
+
 ##TODO：
 * 增加命令行功能，把这个脚本变成一个命令行工具
