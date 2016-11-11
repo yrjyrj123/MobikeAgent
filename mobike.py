@@ -114,11 +114,11 @@ def get_bikes_in_range(lon_min, lon_max, lat_min, lat_max, kml_path=None):
 if __name__=="__main__":
     sys.stderr.write("Start download\n")
 
-    #get_bikes_in_range(116.4, 116.5, 39.9, 40.0,kml_path="test.kml")  #测试用的小范围
+    get_bikes_in_range(116.4, 116.5, 39.9, 40.0,kml_path="test.kml")  #测试用的小范围
 
     #get_bikes_in_range(116, 116.8, 39.6, 40.3,kml_path="beijing.kml")  #北京六环以内的区域,3186块,可以涵盖95%以上的车
 
-    get_bikes_in_range(115.7, 117.4, 39.4, 41.6,kml_path="beijing_all.kml")  #地理书上的整个北京辖区,20976块,大约是六环内的7倍面积
+    #get_bikes_in_range(115.7, 117.4, 39.4, 41.6,kml_path="beijing_all.kml")  #地理书上的整个北京辖区,20976块,大约是六环内的7倍面积
 
     #get_bikes_in_range(120.85,122.2,30.6,31.9,kml_path="shanghai.kml")  #上海范围
 
