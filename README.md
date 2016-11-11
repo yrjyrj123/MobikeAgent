@@ -33,7 +33,7 @@
     
     mobike.get_bikes_in_range(116, 116.8, 39.6, 40.3, kml_path="out.kml")   #输出KML文件，用于在Google Earth等工具中可视化
     
-##数据样例：
+##数据样例
 **/data**目录下为2016年10月22日中午采集的数据。分为北京和上海的CSV和KML文件，共4个，约4w辆单车，供参考。
 
 ##TODO：
