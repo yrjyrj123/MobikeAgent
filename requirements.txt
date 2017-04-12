@@ -1,2 +1,4 @@
 gevent
 requests
+haversine
+tqdm
