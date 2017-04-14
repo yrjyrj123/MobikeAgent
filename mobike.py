@@ -1,13 +1,18 @@
 #!coding=utf-8
-import lib.api_request
-from lib.tile import Tile
-from lib.kml import KML
+from gevent import monkey
+
+monkey.patch_all()
+from gevent.pool import Pool
 
 import random
 import sys
 from tqdm import tqdm
 import time
-from gevent.pool import Pool
+
+import lib.api_request
+from lib.tile import Tile
+from lib.kml import KML
+from lib.coordTransform import gcj02_to_wgs84
 
 t = None
 
@@ -106,6 +111,10 @@ def _output_stdout(bikes):
 
 def get_bikes_in_range(lon_min, lon_max, lat_min, lat_max, kml_path=None, csv_path=None):
     bikes = _scan_bikes(lon_min, lon_max, lat_min, lat_max)
+    for bike in bikes:
+        lon, lat = gcj02_to_wgs84(bike['lon'], bike['lat'])
+        bike['lon'] = lon
+        bike['lat'] = lat
     time.sleep(1)
     print """
     -----------------------
@@ -123,7 +132,7 @@ def get_bikes_in_range(lon_min, lon_max, lat_min, lat_max, kml_path=None, csv_pa
 
 
 if __name__ == "__main__":
-    #get_bikes_in_range(116.4, 116.41, 39.9, 39.91, kml_path="test.kml", csv_path="test.csv")  # 测试用的小范围
-    get_bikes_in_range(116, 116.8, 39.6, 40.3, kml_path="beijing.kml",csv_path="beijing.csv")  # 北京六环以内的区域,可以涵盖95%以上的车
+    # get_bikes_in_range(116.4, 116.41, 39.9, 39.91, kml_path="test.kml", csv_path="test.csv")  # 测试用的小范围
+    get_bikes_in_range(116, 116.8, 39.6, 40.3, kml_path="beijing.kml", csv_path="beijing.csv")  # 北京六环以内的区域,可以涵盖95%以上的车
     # get_bikes_in_range(115.7, 117.4, 39.4, 41.6,kml_path="beijing_all.kml")  #地理书上的整个北京辖区,大约是六环内的7倍面积
     # get_bikes_in_range(120.85,122.2,30.6,31.9,kml_path="shanghai.kml")  #上海范围

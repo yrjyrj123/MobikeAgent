@@ -1,12 +1,7 @@
-from gevent import monkey
-
-monkey.patch_all()
-
 import requests
 import json
 import os
 import random
-import time
 
 API_URL = "https://api.mobike.com/mobike-api/rent/nearbyBikesInfo.do"
 PROXY_FILE_PATH = "good_proxies.txt"
